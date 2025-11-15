@@ -1,7 +1,6 @@
-
-
-
-def damerau_levenshtein_distance(str1: str, str2: str) -> int:
+def damerau_levenshtein_distance(
+    str1: str, str2: str, best_distance_found: int
+) -> int | None:
     """
     Calculate the Damerau-Levenshtein distance between two words.
 
@@ -37,5 +36,11 @@ def damerau_levenshtein_distance(str1: str, str2: str) -> int:
 
                 table[j][i] = cost
 
+        # if the minimum distance value so far is exceed, early stop
+        # use j because this row has just been calculated
+        if min(table[j]) > best_distance_found:
+            return None
+
     return table[-1][-1]
+
 
