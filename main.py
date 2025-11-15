@@ -15,37 +15,37 @@ def main():
 
         sys.exit()
 
+    try:
+        english_dictionary = create_dictionary(
+            load_file(config["dictionary"]["english_path"])
+        )
+    except (ValueError, FileNotFoundError) as e:
+        print(f"Error loading English dictionary: {e}")
+        sys.exit()
+
+    try:
+        business_dictionary = create_dictionary(
+            load_file(config["dictionary"]["business_path"])
+        )
+    except (ValueError, FileNotFoundError) as e:
+        print(f"Error loading business dictionary: {e}")
+        sys.exit()
+
+    dictionary = english_dictionary | business_dictionary
+
+    while True:
+        research_query = input("Search (or 'quit' to exit): ").strip().lower()
+
+        if research_query == "quit":
+            print("Exiting")
+            sys.exit()
+
+        if research_query:
+            break
+
+        print("\nPlease, insert a search query.")
+
     with cProfile.Profile() as profile:
-        try:
-            english_dictionary = create_dictionary(
-                load_file(config["dictionary"]["english_path"])
-            )
-        except (ValueError, FileNotFoundError) as e:
-            print(f"Error loading English dictionary: {e}")
-            sys.exit()
-
-        try:
-            business_dictionary = create_dictionary(
-                load_file(config["dictionary"]["business_path"])
-            )
-        except (ValueError, FileNotFoundError) as e:
-            print(f"Error loading business dictionary: {e}")
-            sys.exit()
-
-        dictionary = english_dictionary | business_dictionary
-
-        while True:
-            research_query = input("Search (or 'quit' to exit): ").strip().lower()
-
-            if research_query == "quit":
-                print("Exiting")
-                sys.exit()
-
-            if research_query:
-                break
-
-            print("\nPlease, insert a search query.")
-
         suggestions = [
             # max_distance parameter will be 1 if the query contains less than 4 chars, else 2
             suggest_correction(

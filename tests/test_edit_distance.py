@@ -34,7 +34,7 @@ class TestDamerauLevDistance(unittest.TestCase):
         result = damerau_levenshtein_distance("hte", "the", best_distance_found=3)
         self.assertEqual(result, 1)
 
-        result = damerau_levenshtein_distance("house", "hosue", best_distance_found=10)
+        result = damerau_levenshtein_distance("house", "hosue", best_distance_found=2)
         self.assertEqual(result, 1)
 
     def test_multiple_transpositions(self):
