@@ -1,47 +1,63 @@
-import json
 import cProfile
+import sys
+import json
 import pstats
-from utils import load_file, create_dictionary, get_max_distance
+from utils import load_file, create_dictionary, get_max_distance, load_config
 from corrector import suggest_correction, query_tokenizer
 
 
 def main():
-    # TODO: evaluate to create an helper function also for getting config files in order to handle JsonDecodeError
-    with open("config.json", "r") as file:
-        config = json.load(file)
+    try:
+        config = load_config("./config.json")
+
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(e)
+
+        sys.exit()
 
     with cProfile.Profile() as profile:
         try:
             english_dictionary = create_dictionary(
                 load_file(config["dictionary"]["english_path"])
             )
+        except (ValueError, FileNotFoundError) as e:
+            print(f"Error loading English dictionary: {e}")
+            sys.exit()
 
+        try:
             business_dictionary = create_dictionary(
                 load_file(config["dictionary"]["business_path"])
             )
-        # TODO: understand if ValueError is appropriate for empty files, else change it
         except (ValueError, FileNotFoundError) as e:
-            print(e)
+            print(f"Error loading business dictionary: {e}")
+            sys.exit()
 
-        else:
-            dictionary = english_dictionary | business_dictionary
+        dictionary = english_dictionary | business_dictionary
 
-            while True:
-                research_query = input("Search: ").strip().lower()
+        while True:
+            research_query = input("Search (or 'quit' to exit): ").strip().lower()
 
-                if research_query:
-                    break
+            if research_query == "quit":
+                print("Exiting")
+                sys.exit()
 
-            suggestions = [
-                # max_distance parameter will be 1 if the query contains less than 4 chars, else 2 
-                suggest_correction(
-                    query, dictionary, max_distance=get_max_distance(len(query), config)
-                )
-                for query in query_tokenizer(research_query)
-                if query
-            ]
+            if research_query:
+                break
 
-            print(" ".join(suggestions))
+            print("\nPlease, insert a search query.")
+
+        suggestions = [
+            # max_distance parameter will be 1 if the query contains less than 4 chars, else 2
+            suggest_correction(
+                query.strip(),
+                dictionary,
+                max_distance=get_max_distance(len(query), config),
+            )
+            for query in query_tokenizer(research_query)
+            if query
+        ]
+
+        print(" ".join(suggestions))
 
     stats = pstats.Stats(profile).sort_stats(pstats.SortKey.TIME)
 

@@ -11,6 +11,8 @@ def query_tokenizer(query: str) -> List[str]:
 
 def calculate_probability(word: str, words: Dict[str, int]) -> float:
     """Calculate the probability of each single word in the dictionary."""
+    if word not in words:
+        raise KeyError(f"Word: {word} not in dictionary.")
 
     return words[word] / sum(words.values())
 
@@ -25,6 +27,7 @@ def suggest_correction(
 
     candidates = []
     best_distance_found = max_distance
+
     for word in dictionary:
         if abs(len(word) - len(query)) > max_distance:
             continue
